@@ -6,6 +6,7 @@ import { WeekView } from "./components/WeekView";
 
 export default function App() {
   const [adminMode, setAdminMode] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const store = useStore();
   const { state, loading, saving, getWeekProgress, getGlobalProgress } = store;
   const currentWeek = state.weeks.find((w) => w.id === state.currentWeek) || state.weeks[0];
@@ -33,15 +34,24 @@ export default function App() {
         adminMode={adminMode}
         onToggleAdmin={() => setAdminMode((v) => !v)}
         saving={saving}
+        onMenuOpen={() => setSidebarOpen(true)}
       />
       <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 72px)" }}>
+        {sidebarOpen && (
+          <div
+            className="fixed top-[72px] inset-x-0 bottom-0 bg-black/40 z-30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
         <Sidebar
           weeks={state.weeks}
           currentWeek={state.currentWeek}
           getWeekProgress={getWeekProgress}
-          onSelect={store.setCurrentWeek}
+          onSelect={(id) => { store.setCurrentWeek(id); setSidebarOpen(false); }}
           adminMode={adminMode}
           onAddWeek={store.addWeek}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
         <main className="flex-1 overflow-y-auto">
           {currentWeek ? (

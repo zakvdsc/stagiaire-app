@@ -1,7 +1,22 @@
-export function Sidebar({ weeks, currentWeek, getWeekProgress, onSelect, adminMode, onAddWeek }) {
+export function Sidebar({ weeks, currentWeek, getWeekProgress, onSelect, adminMode, onAddWeek, isOpen, onClose }) {
   return (
-    <aside className="w-56 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col py-4">
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-4 mb-3">Semaines</p>
+    <aside className={`
+      fixed top-[72px] bottom-0 left-0 z-40 w-64
+      md:static md:top-auto md:bottom-auto md:left-auto md:w-56 md:translate-x-0 md:z-auto
+      flex-shrink-0 bg-white border-r border-gray-100 flex flex-col py-4
+      transform transition-transform duration-200 ease-in-out
+      ${isOpen ? "translate-x-0" : "-translate-x-full"}
+    `}>
+      <div className="flex items-center justify-between px-4 mb-3">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Semaines</p>
+        <button
+          onClick={onClose}
+          className="md:hidden w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-400 transition text-sm"
+          aria-label="Fermer"
+        >
+          ✕
+        </button>
+      </div>
       <nav className="flex flex-col gap-0.5 px-2 flex-1 overflow-y-auto">
         {weeks.map((week) => {
           const pct = getWeekProgress(week);
@@ -19,7 +34,7 @@ export function Sidebar({ weeks, currentWeek, getWeekProgress, onSelect, adminMo
                   <span className={`text-xs font-mono font-medium ${active ? "text-violet-500" : "text-gray-400"}`}>
                     S{week.num}
                   </span>
-                  <span className="text-xs font-medium leading-tight truncate max-w-[90px]">{week.label}</span>
+                  <span className="text-xs font-medium leading-tight truncate max-w-[110px]">{week.label}</span>
                 </div>
                 <span className={`text-xs font-semibold ${pct === 100 ? "text-emerald-600" : active ? "text-violet-600" : "text-gray-400"}`}>
                   {pct}%

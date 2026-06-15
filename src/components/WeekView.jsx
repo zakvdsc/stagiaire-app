@@ -85,9 +85,9 @@ export function WeekView({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-6 max-w-3xl mx-auto w-full">
+    <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6 max-w-3xl mx-auto w-full">
       {/* En-tête semaine */}
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-6 flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-3 mb-1">
             <span className="text-xs font-mono font-semibold text-violet-500 bg-violet-50 px-2 py-0.5 rounded-md">
@@ -104,18 +104,19 @@ export function WeekView({
             <EditableText
               value={week.label}
               onChange={(v) => onUpdateWeekLabel(week.id, v)}
-              className="text-2xl font-semibold text-gray-900"
+              className="text-xl sm:text-2xl font-semibold text-gray-900"
             />
           ) : (
-            <h2 className="text-2xl font-semibold text-gray-900">{week.label}</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">{week.label}</h2>
           )}
         </div>
         {adminMode && (
           <button
             onClick={() => { if (confirm(`Supprimer la semaine "${week.label}" ?`)) onRemoveWeek(week.id); }}
-            className="flex-shrink-0 text-xs px-3 py-1.5 border border-red-200 text-red-400 rounded-lg hover:bg-red-50 transition"
+            className="flex-shrink-0 text-xs px-2 sm:px-3 py-1.5 border border-red-200 text-red-400 rounded-lg hover:bg-red-50 transition"
           >
-            Supprimer la semaine
+            <span className="hidden sm:inline">Supprimer la semaine</span>
+            <span className="sm:hidden">✕ Suppr.</span>
           </button>
         )}
       </div>
@@ -224,7 +225,7 @@ export function WeekView({
         <section>
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Journal de bord</h3>
           <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
-            <div className="flex gap-2 mb-3">
+            <div className="flex flex-col sm:flex-row gap-2 mb-3">
               <input
                 type="text"
                 placeholder="Ton prénom"
