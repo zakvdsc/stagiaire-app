@@ -1,17 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "../lib/supabase";
 import { INITIAL_WEEKS } from "../data/roadmap";
 
-const STORAGE_KEY = "stagiaire_app_v1";
+const ROW_ID = "main";
 
-function uid() {
-  return Math.random().toString(36).slice(2, 9);
-}
-
-function getInitialState() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch {}
+function getDefaultState() {
   return {
     meta: {
       stageName: "Stage — Intégration AV",
@@ -28,16 +21,48 @@ function getInitialState() {
   };
 }
 
+function uid() {
+  return Math.random().toString(36).slice(2, 9);
+}
+
 export function useStore() {
-  const [state, setState] = useState(getInitialState);
+  const [state, setState] = useState(getDefaultState);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
+  // Charger depuis Supabase au démarrage
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {}
-  }, [state]);
+    async function load() {
+      const { data, error } = await supabase
+        .from("roadmap")
+        .select("data")
+        .eq("id", ROW_ID)
+        .single();
 
-  const update = (fn) => setState((s) => ({ ...s, ...fn(s) }));
+      if (!error && data?.data && Object.keys(data.data).length > 0) {
+        setState((s) => ({ ...s, ...data.data }));
+      }
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  // Sauvegarder dans Supabase à chaque changement (debounced)
+  useEffect(() => {
+    if (loading) return;
+    const timer = setTimeout(async () => {
+      setSaving(true);
+      // On exclut currentWeek de la sauvegarde (local seulement)
+      const { currentWeek, ...toSave } = state;
+      await supabase
+        .from("roadmap")
+        .upsert({ id: ROW_ID, data: toSave, updated_at: new Date().toISOString() });
+      setSaving(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [state, loading]);
+
+  const update = useCallback((fn) => setState((s) => ({ ...s, ...fn(s) })), []);
 
   const toggleLivrable = (livrableId) =>
     update((s) => ({ progress: { ...s.progress, [livrableId]: !s.progress[livrableId] } }));
@@ -60,8 +85,6 @@ export function useStore() {
   const updateMeta = (meta) => update((s) => ({ meta: { ...s.meta, ...meta } }));
 
   const setCurrentWeek = (weekId) => update(() => ({ currentWeek: weekId }));
-
-  // --- Edition de la structure ---
 
   const addWeek = () => {
     update((s) => {
@@ -157,13 +180,17 @@ export function useStore() {
     return Math.round((done / total) * 100);
   };
 
-  const resetAll = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setState(getInitialState());
+  const resetAll = async () => {
+    const fresh = getDefaultState();
+    setState(fresh);
+    const { currentWeek, ...toSave } = fresh;
+    await supabase
+      .from("roadmap")
+      .upsert({ id: ROW_ID, data: toSave, updated_at: new Date().toISOString() });
   };
 
   return {
-    state,
+    state, loading, saving,
     toggleLivrable, toggleMission,
     addNote, deleteNote,
     updateMeta, setCurrentWeek,

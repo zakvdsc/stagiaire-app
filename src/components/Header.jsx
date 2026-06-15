@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export function Header({ meta, globalProgress, onUpdateMeta, onReset, adminMode, onToggleAdmin }) {
+export function Header({ meta, globalProgress, onUpdateMeta, onReset, adminMode, onToggleAdmin, saving }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(meta);
 
@@ -18,9 +18,14 @@ export function Header({ meta, globalProgress, onUpdateMeta, onReset, adminMode,
             <span className="text-white text-sm font-semibold font-mono">AV</span>
           </div>
           <div>
-            <h1 className="text-base font-semibold text-gray-900 leading-tight">
-              {meta.stageName || "Stage — Intégration AV"}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-semibold text-gray-900 leading-tight">
+                {meta.stageName || "Stage — Intégration AV"}
+              </h1>
+              {saving && (
+                <span className="text-xs text-gray-400 animate-pulse">· Sauvegarde…</span>
+              )}
+            </div>
             <p className="text-xs text-gray-400 mt-0.5">
               {meta.internName && <span className="mr-2">👤 {meta.internName}</span>}
               {meta.tutorName && <span className="mr-2">🎓 {meta.tutorName}</span>}
@@ -55,9 +60,7 @@ export function Header({ meta, globalProgress, onUpdateMeta, onReset, adminMode,
             <button
               onClick={onToggleAdmin}
               className={`text-xs px-3 py-1.5 rounded-lg border transition ${
-                adminMode
-                  ? "bg-violet-600 text-white border-violet-600"
-                  : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                adminMode ? "bg-violet-600 text-white border-violet-600" : "border-gray-200 text-gray-600 hover:bg-gray-50"
               }`}
             >
               {adminMode ? "✏️ Édition active" : "Modifier structure"}

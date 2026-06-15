@@ -7,8 +7,21 @@ import { WeekView } from "./components/WeekView";
 export default function App() {
   const [adminMode, setAdminMode] = useState(false);
   const store = useStore();
-  const { state, getWeekProgress, getGlobalProgress } = store;
+  const { state, loading, saving, getWeekProgress, getGlobalProgress } = store;
   const currentWeek = state.weeks.find((w) => w.id === state.currentWeek) || state.weeks[0];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F6F3]">
+        <div className="text-center">
+          <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center mx-auto mb-4">
+            <span className="text-white text-sm font-semibold font-mono">AV</span>
+          </div>
+          <p className="text-sm text-gray-400">Chargement du suivi de stage…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F7F6F3]">
@@ -19,6 +32,7 @@ export default function App() {
         onReset={store.resetAll}
         adminMode={adminMode}
         onToggleAdmin={() => setAdminMode((v) => !v)}
+        saving={saving}
       />
       <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 72px)" }}>
         <Sidebar
